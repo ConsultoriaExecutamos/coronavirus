@@ -36,6 +36,11 @@ dead_population = time_series_df['Total Deaths'].values[len(time_series_df) - 1]
 susceptible_population = country_population - recovered_population - dead_population - current_infected_population
 
 
+# params estimation
+
+
+
+
 # initial model values
 S = susceptible_population          # susceptible population
 I = current_infected_population     # infected population
