@@ -1,21 +1,34 @@
-<h1 align="center" style="background-color: #192072">
-  COVID-19 Data Analysis by 
-  <span>
-    <a href="#" alt="Made with Python 3">
-        <img src="https://i.ibb.co/VCz68QL/Screenshot-17.png" />
-    </a>
-  </span>
-</h1>
+# coronavirus
 
-<p align="center">
-    <a href="#" alt="Made with Python 3">
-        <img src="https://img.shields.io/badge/made%20with-Python%203-blue?style=flat&logo=python" />
-    </a>
-</p>
+## Project setup
+```
+yarn install
+```
 
-<p align="center">
-  Trying to forecast coronavirus spread under different quarantine scenarios using computer science
-</p>
+### Compiles and hot-reloads for development
+```
+yarn serve
+```
 
+### Compiles and minifies for production
+```
+yarn build
+```
 
+### Run your unit tests
+```
+yarn test:unit
+```
 
+### Run your end-to-end tests
+```
+yarn test:e2e
+```
+
+### Lints and fixes files
+```
+yarn lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
