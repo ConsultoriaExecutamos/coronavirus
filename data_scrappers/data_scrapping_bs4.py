@@ -1,11 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-import time
-import threading
 
-
-t0 = time.time()
 
 main_worldometer_coronavirus_data_ulr = 'https://www.worldometers.info/coronavirus'
 
@@ -75,9 +71,4 @@ for country in all_linked_countries_list:
     dataframe = pd.DataFrame(data, columns=['Date', 'Total Cases', 'Daily New Cases', 'Active Cases', 'Total Deaths', 'Daily New Deaths'])
 
     dataframe.to_csv(country + '.csv', index=False)
-
-    print(country)
-
-
-print(time.time() - t0)
 

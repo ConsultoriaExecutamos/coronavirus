@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-import time
 import threading
 
 
-def retrieve_country_data_and_save(country, feedback_feeder):
+def retrieve_country_data_and_save(country):
 
     country_worldometer_html = requests.get(main_worldometer_coronavirus_data_ulr + '/country/' + country)
 
@@ -32,14 +31,6 @@ def retrieve_country_data_and_save(country, feedback_feeder):
 
     total_cases_x_axys = soup.findAll("script")[index_list[0]].text.split('\n')[14].split(': ')[1].split('    ')[0][
                          1:-1].replace('"', '').split(',')
-    # daily_new_cases_x_axys = soup.findAll("script")[index_list[1]].text.split('\n')[14].split(': ')[1].split('    ')[0][
-    #                          1:-1].replace('"', '').split(',')
-    # active_cases_x_axys = soup.findAll("script")[index_list[2]].text.split('\n')[14].split(': ')[1].split('    ')[0][
-    #                       1:-1].replace('"', '').split(',')
-    # total_deaths_x_axys = soup.findAll("script")[index_list[3]].text.split('\n')[14].split(': ')[1].split('    ')[0][
-    #                       1:-1].replace('"', '').split(',')
-    # daily_new_deaths_x_axys = soup.findAll("script")[index_list[4]].text.split('\n')[14].split(': ')[1].split('    ')[
-    #                               0][1:-1].replace('"', '').split(',')
 
     total_cases_y_axys = soup.findAll("script")[index_list[0]].text.split('\n')[38].split('[')[1].split(']')[0].split(
         ',')
@@ -63,7 +54,6 @@ def retrieve_country_data_and_save(country, feedback_feeder):
 
     dataframe.to_csv('data/countries_data/' + country + '.csv', index=False)
 
-    finished_feedback.append(0)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -92,12 +82,8 @@ for linked_country in all_linked_countries_elements[:int(len(all_linked_countrie
             all_linked_countries_list.append(linked_country['href'].split('/')[1])
 
 
-finished_feedback = []
 
 for country in all_linked_countries_list:
-    data_request = threading.Thread(target=retrieve_country_data_and_save, args=(country, finished_feedback))
+    data_request = threading.Thread(target=retrieve_country_data_and_save, args=(country,))
     data_request.start()
-
-while len(finished_feedback)<len(all_linked_countries_list):
-    pass
 
