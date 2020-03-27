@@ -1,5 +1,5 @@
 <h1 align="center" style="background-color: #192072">
-  COVID-19 Scrapper by 
+  COVID-19 Data Analysis by 
   <span>
     <a href="#" alt="Made with Python 3">
         <img src="https://i.ibb.co/VCz68QL/Screenshot-17.png" />
