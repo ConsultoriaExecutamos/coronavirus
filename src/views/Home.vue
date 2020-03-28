@@ -20,7 +20,7 @@
               <line-chart
                 :chartdata="chartData"
                 :options="chartOptions"
-                :style="chartStyles"
+                :gradientColors="chartGradient"
               >
               </line-chart>
             </div>
@@ -95,8 +95,9 @@ export default {
         datasets: [
           {
             label: "Total de Casos",
-            backgroundColor: "rgba(0,0,0,0)",
+            // backgroundColor: "rgba(255, 99, 132, 0.5)",
             borderColor: "rgb(255, 99, 132)",
+            pointBackgroundColor: "rgb(255, 99, 132)",
             data: [
               15,
               15,
@@ -159,10 +160,8 @@ export default {
     };
   },
   computed: {
-    chartStyles() {
-      return {
-        "max-height": "200rem"
-      };
+    chartGradient() {
+      return ["rgba(255, 99, 132, 0.25)", "rgba(255, 99, 132, 0.0)"];
     }
   }
 };
