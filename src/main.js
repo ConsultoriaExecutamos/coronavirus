@@ -4,6 +4,7 @@ import router from "./router";
 import store from "./store";
 
 import Buefy from "buefy";
+import "./styles/theme.scss";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faCheck,
