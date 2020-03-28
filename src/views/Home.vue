@@ -1,21 +1,19 @@
 <template>
   <div class="home">
     <section class="section">
-      <div class="container">
-        <div id="header">
-          <div class="columns">
-            <div class="column is-2">
-              <img src="@/assets/corona.svg" alt="" srcset="" />
-            </div>
-            <div class="column is-4 has-text-left">
-              <h1>COVID-19</h1>
-              <h4>Análise</h4>
-            </div>
+      <div id="header" class="container">
+        <div class="columns">
+          <div class="column is-2">
+            <img src="@/assets/corona.svg" alt="" srcset="" />
+          </div>
+          <div class="column is-4 has-text-left">
+            <h1>COVID-19</h1>
+            <h4>Análise</h4>
           </div>
         </div>
       </div>
       <hr />
-      <div class="container">
+      <div id="chart-container" class="container">
         <div class="columns">
           <div class="column is-half">
             <div class="box">
@@ -27,7 +25,15 @@
               </line-chart>
             </div>
           </div>
-          <div class="column is-half">b</div>
+          <div class="column is-half">
+            <h1>
+              <span class="category"
+                ><span class="underline">Previsão</span>:
+              </span>
+              <span class="number-info">200.000</span> casos totais até 26
+              abril.
+            </h1>
+          </div>
         </div>
       </div>
     </section>
@@ -88,8 +94,8 @@ export default {
         ],
         datasets: [
           {
-            label: "My First dataset",
-            backgroundColor: "rgb(255, 99, 132)",
+            label: "Total de Casos",
+            backgroundColor: "rgba(0,0,0,0)",
             borderColor: "rgb(255, 99, 132)",
             data: [
               15,
@@ -139,7 +145,16 @@ export default {
       },
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+          xAxes: [
+            {
+              gridLines: {
+                display: false
+              }
+            }
+          ]
+        }
       }
     };
   },
@@ -154,6 +169,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import "@/styles/theme.scss";
+
 body {
   min-height: 100vh;
   background-image: linear-gradient(
@@ -186,6 +203,27 @@ body {
   img {
     display: block;
     width: 100%;
+  }
+}
+
+#chart-container {
+  h1 {
+    font-weight: normal;
+    font-size: 2rem;
+
+    .category {
+      font-weight: 600;
+    }
+
+    .underline {
+      text-decoration: underline;
+      text-decoration-color: $primary;
+    }
+
+    .number-info {
+      font-weight: 800;
+      font-size: 2.5rem;
+    }
   }
 }
 </style>
