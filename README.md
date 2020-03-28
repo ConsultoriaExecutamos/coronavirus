@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  Trying to forecast coronavirus spread under different quarantine scenarios using computer science
+  Trying to forecast coronavirus spread under different quarantine scenarios using data analytics
 </p>
 
 
