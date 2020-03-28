@@ -47,15 +47,17 @@ I = current_infected_population     # infected population
 R = recovered_population            # recovered population
 D = dead_population                 # dead population
 
-forecast_days = 30
+forecast_days = 150
 
 # disease params
-alpha = 0.14       # infection rate    - source:
-beta = 0.05        # recovery rate     - source:
-gamma = 0.035         # fatality rate     - source:
+alpha = 0.36       # infection rate    - source:
+beta = 0.16        # recovery rate     - source:
+gamma = 0.001        # fatality rate     - source:
 
 
 SIRD_forecast_time_series = pd.DataFrame({'S': S, 'I': I, 'R': R, 'D': D}, index=[0])
+
+total_cases = [2200]
 
 # model
 for day in range(1, forecast_days):
@@ -69,6 +71,8 @@ for day in range(1, forecast_days):
     recovered_population_forecast = int(last_period_R + (beta*last_period_I))
     dead_population_forecast = int(last_period_D + (gamma*last_period_I))
 
+    total_cases.append(total_cases[-1] + ((alpha/country_population)*last_period_S*last_period_I))
+
     SIRD_forecast_time_series = SIRD_forecast_time_series.append(pd.DataFrame({"S": susceptible_population_forecast,
                                                                                "I": infected_population_forecast,
                                                                                "R": recovered_population_forecast,
@@ -76,6 +80,11 @@ for day in range(1, forecast_days):
 
 print(SIRD_forecast_time_series)
 
-plt.plot(SIRD_forecast_time_series['I'].to_numpy())
-
+# plt.plot(SIRD_forecast_time_series['S'].to_numpy(), label='')
+plt.plot(SIRD_forecast_time_series['I'].to_numpy(), label='Casos ativos')
+plt.plot(SIRD_forecast_time_series['R'].to_numpy(), label='Recuperados')
+plt.plot(SIRD_forecast_time_series['D'].to_numpy(), label='Mortos')
+plt.plot(total_cases, label='Casos Totais')
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, mode="expand", borderaxespad=0.)
 plt.show()

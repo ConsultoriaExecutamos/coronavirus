@@ -25,6 +25,8 @@ SELECTORS["deaths-total"] = "div.row:nth-child(4) > div:nth-child(1) > script:nt
 SELECTORS["deaths-daily"] = "div.row:nth-child(5) > div:nth-child(1) > script:nth-child(3)"
 
 
+root_dir = os.path.join(os.path.dirname( __file__ ), '..' )
+
 def country_to_csv(country):
     response = requests.get(URL + country)
     doc = html.fromstring(response.content)
@@ -46,7 +48,7 @@ def country_to_csv(country):
     dataframe.columns = [
         'Date', 'Total Cases', 'Daily New Cases', 'Active Cases', 'Total Deaths', 'Daily New Deaths']
 
-    dataframe.to_csv(f".\data\\{country[8:-1]}.csv", index=False)
+    dataframe.to_csv(root_dir + '/data/countries_time_series/' + country + '.csv', index=False)
 
     return country
 
@@ -69,3 +71,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import os
 
+root_dir = os.path.join(os.path.dirname( __file__ ), '..' )
 
 main_worldometer_coronavirus_data_ulr = 'https://www.worldometers.info/coronavirus'
 
@@ -70,5 +72,5 @@ for country in all_linked_countries_list:
 
     dataframe = pd.DataFrame(data, columns=['Date', 'Total Cases', 'Daily New Cases', 'Active Cases', 'Total Deaths', 'Daily New Deaths'])
 
-    dataframe.to_csv(country + '.csv', index=False)
+    dataframe.to_csv(root_dir + '/data/countries_time_series/' + country + '.csv', index=False)
 

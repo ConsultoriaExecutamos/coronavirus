@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import threading
-
+import os
 
 def retrieve_country_data_and_save(country):
 
@@ -52,13 +52,14 @@ def retrieve_country_data_and_save(country):
     dataframe = pd.DataFrame(data, columns=['Date', 'Total Cases', 'Daily New Cases', 'Active Cases', 'Total Deaths',
                                             'Daily New Deaths'])
 
-    dataframe.to_csv('data/countries_data/' + country + '.csv', index=False)
+    dataframe.to_csv(root_dir + '/data/countries_time_series/' + country + '.csv', index=False)
 
 
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
 
+root_dir = os.path.join(os.path.dirname( __file__ ), '..' )
 
 main_worldometer_coronavirus_data_ulr = 'https://www.worldometers.info/coronavirus'
 
