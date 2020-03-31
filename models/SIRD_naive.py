@@ -10,82 +10,33 @@ import numpy as np
 # load and set data
 root_dir = os.path.join(os.path.dirname( __file__ ), '..' )
 
-all_countries_files_list = os.listdir(root_dir + '/data/countries_time_series')
+time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/brazil.csv')
 
-for country_file in all_countries_files_list:
-    if country_file == 'china-hong-kong-sar.csv':
-        pass
-    else:
-        try:
-            country = country_file.replace('.csv', '')
+total_cases_time_series = time_series_df['Total Cases'].to_numpy()
 
-            time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/' + country_file)
+active_cases_time_series = time_series_df['Active Cases'].to_numpy()
 
-            total_cases_time_series = time_series_df['Total Cases'].to_numpy()
+total_deaths_time_series = time_series_df['Total Deaths'].to_numpy()
 
-            active_cases_time_series = time_series_df['Active Cases'].to_numpy()
+total_recover_cases_time_series = pd.DataFrame(total_cases_time_series - active_cases_time_series - total_deaths_time_series)
 
-            total_deaths_time_series = time_series_df['Total Deaths'].to_numpy()
+time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
 
-            total_recover_cases_time_series = pd.DataFrame(total_cases_time_series - active_cases_time_series - total_deaths_time_series)
+print(time_series_df)
 
-            time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
+# retrieve country data
 
-            demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
+demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
 
+country_population = demographics_df['Population'].values[demographics_df.index[demographics_df['Country'] == 'Brazil']]
 
-            # retrieve country data
+current_infected_population = time_series_df['Active Cases'].values[len(time_series_df) - 1]
 
-            capitalized_fist_letter_country = country[0].capitalize() + country[1:]
+recovered_population = time_series_df['Total Recover Cases'].values[len(time_series_df) - 1]
 
-            country_population = demographics_df['Population'].values[demographics_df.index[demographics_df['Country'] == capitalized_fist_letter_country].tolist()[0]]
+dead_population = time_series_df['Total Deaths'].values[len(time_series_df) - 1]
 
-            current_infected_population = time_series_df['Active Cases'].values[len(time_series_df) - 1]
-
-            recovered_population = time_series_df['Total Recover Cases'].values[len(time_series_df) - 1]
-
-            dead_population = time_series_df['Total Deaths'].values[len(time_series_df) - 1]
-
-            susceptible_population = country_population - recovered_population - dead_population - current_infected_population
-
-            # params estimation        source: Anastassopoulou(2020)
-
-            # linear regression for estimating Basic Reproduction Number
-
-            recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()
-
-            dead_population_vector = time_series_df['Total Deaths'].to_numpy()
-
-            infected_population_vector = time_series_df['Total Cases'].to_numpy()
-
-            for i in range(len(infected_population_vector)):
-                infected_population_vector[i] = infected_population_vector[i]
-
-            X = np.matrix([recovered_population_vector + dead_population_vector]).transpose()
-
-            Y = np.matrix([recovered_population_vector + dead_population_vector + infected_population_vector]).transpose()
-
-            brn = (X.transpose()*X).I*X.transpose()*Y
-
-            print(brn, country)
-
-        except:
-            print(country, 'Failed')
-            pass
-
-# # linear regression for estimating fatality rate (gamma)
-# recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()
-#
-# dead_population_vector = time_series_df['Total Deaths'].to_numpy()
-#
-# infected_population_vector = time_series_df['Total Cases'].to_numpy()
-#
-# # linear regression for estimating recovery rate (beta)
-# recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()
-#
-# dead_population_vector = time_series_df['Total Deaths'].to_numpy()
-#
-# infected_population_vector = time_series_df['Total Cases'].to_numpy()
+susceptible_population = country_population - recovered_population - dead_population - current_infected_population
 
 
 # initial model values
@@ -99,12 +50,13 @@ forecast_days = 150
 # disease params
 alpha = 0.36       # infection rate    - source:
 beta = 0.16        # recovery rate     - source:
-gamma = 0.001        # fatality rate     - source:
+gamma = 0.034        # fatality rate     - source: WHO
 
 
 SIRD_forecast_time_series = pd.DataFrame({'S': S, 'I': I, 'R': R, 'D': D}, index=[0])
 
-total_cases = [2200]
+total_cases = [time_series_df['Total Cases'].values[-1]]
+
 
 # model
 for day in range(1, forecast_days):
@@ -134,4 +86,4 @@ plt.plot(SIRD_forecast_time_series['D'].to_numpy(), label='Mortos')
 plt.plot(total_cases, label='Casos Totais')
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, mode="expand", borderaxespad=0.)
-# plt.show()
+plt.show()

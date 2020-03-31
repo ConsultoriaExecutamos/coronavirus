@@ -39,11 +39,11 @@ susceptible_population = country_population - recovered_population - dead_popula
 # params estimation        source: Anastassopoulou(2020)
 
 # linear regression for estimating Basic Reproduction Number
-recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()*40
+recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()
 
 dead_population_vector = time_series_df['Total Deaths'].to_numpy()
 
-infected_population_vector = time_series_df['Total Cases'].to_numpy()*20
+infected_population_vector = time_series_df['Total Cases'].to_numpy()
 
 X = np.matrix([recovered_population_vector + dead_population_vector]).transpose()
 
@@ -51,25 +51,7 @@ Y = np.matrix([recovered_population_vector + dead_population_vector + infected_p
 
 brn = (X.transpose()*X).I*X.transpose()*Y
 
-
-# linear regression for estimating fatality rate (gamma)
-recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()*40
-
-dead_population_vector = time_series_df['Total Deaths'].to_numpy()
-
-infected_population_vector = time_series_df['Total Cases'].to_numpy()*20
-
-
-
-# linear regression for estimating recovery rate (beta)
-recovered_population_vector = time_series_df['Total Recover Cases'].to_numpy()*40
-
-dead_population_vector = time_series_df['Total Deaths'].to_numpy()
-
-infected_population_vector = time_series_df['Total Cases'].to_numpy()*20
-
-
-
+print(brn)
 
 
 # initial model values
