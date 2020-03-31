@@ -307,7 +307,7 @@ if __name__ == '__main__':
 
     parameters_list = optimized_SIRD_model_result.x
 
-    R_nough_list = []
+    R_naught_list = []
 
     for day in range(forecast_days):
 
@@ -315,15 +315,15 @@ if __name__ == '__main__':
         beta = parameters_list[1 + 3 * day]
         gamma = parameters_list[2 + 3 * day]
 
-        R_nough = alpha / (beta + gamma)
+        R_naught = alpha / (beta + gamma)
 
-        R_nough_list.append(R_nough)
+        R_naught_list.append(R_naught)
 
     print(parameters_list)
 
     print(len(parameters_list))
 
-    print(R_nough_list)
+    print(R_naught_list)
 
     periods_for_forecasting = 20
 
