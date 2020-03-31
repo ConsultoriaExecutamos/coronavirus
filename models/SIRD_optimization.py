@@ -176,9 +176,9 @@ def sird_model_fitting(X):
 
     susceptible_population = time_series_df['Susceptible Population'].values[df_index]
 
-    current_infected_population = time_series_df['Active Cases'].values[df_index] * 20
+    current_infected_population = time_series_df['Active Cases'].values[df_index]
 
-    recovered_population = time_series_df['Total Recover Cases'].values[df_index] * 40
+    recovered_population = time_series_df['Total Recover Cases'].values[df_index]
 
     dead_population = time_series_df['Total Deaths'].values[df_index]
 
