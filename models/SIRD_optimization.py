@@ -12,11 +12,11 @@ def sird_model(X, periods=15):
     demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
 
     country_population = (demographics_df['Population'].values[
-        demographics_df.index[demographics_df['Country'] == 'Brazil']])
+        demographics_df.index[demographics_df['Country'] == 'Us']])
 
     # load and set time series data
 
-    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/brazil.csv')
+    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/us.csv')
 
     total_cases_time_series = time_series_df['Total Cases'].to_numpy()
 
@@ -29,7 +29,9 @@ def sird_model(X, periods=15):
 
     time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
 
-    susceptible_population_time_series = np.repeat(country_population, len(time_series_df))
+    country_population_vector = np.repeat(country_population, len(time_series_df))
+
+    susceptible_population_time_series = country_population_vector - time_series_df['Total Cases'].to_numpy()
 
     time_series_df.insert(len(time_series_df.columns), 'Susceptible Population', susceptible_population_time_series)
 
@@ -60,7 +62,7 @@ def sird_model(X, periods=15):
     R = recovered_population  # recovered population
     D = dead_population  # dead population
 
-    total_cases = [time_series_df['Total Cases'].values[df_index]]
+    total_cases_forecast = [time_series_df['Total Cases'].values[df_index]]
 
     SIRD_forecast_time_series = pd.DataFrame({'S': S, 'I': I, 'R': R, 'D': D}, index=[0])
 
@@ -70,9 +72,9 @@ def sird_model(X, periods=15):
 
     for day in range(1, forecast_days):
         # disease params
-        alpha = X[0 + 3*day]
-        beta = X[1 + 3*day]
-        gamma = X[2 + 3*day]
+        alpha = X[0]
+        beta = X[1]
+        gamma = X[2]
 
         last_period_S = SIRD_forecast_time_series['S'].values[len(SIRD_forecast_time_series) - 1]
         last_period_I = SIRD_forecast_time_series['I'].values[len(SIRD_forecast_time_series) - 1]
@@ -84,7 +86,7 @@ def sird_model(X, periods=15):
         recovered_population_forecast = int(last_period_R + (beta * last_period_I))
         dead_population_forecast = int(last_period_D + (gamma * last_period_I))
 
-        total_cases.append(total_cases[-1] + ((alpha / country_population) * last_period_S * last_period_I))
+        total_cases_forecast.append(total_cases_forecast[-1] + ((alpha / country_population) * last_period_S * last_period_I))
 
         SIRD_forecast_time_series = SIRD_forecast_time_series.append(pd.DataFrame({"S": susceptible_population_forecast,
                                                                                    "I": infected_population_forecast,
@@ -92,9 +94,9 @@ def sird_model(X, periods=15):
                                                                                    "D": dead_population_forecast},
                                                                                   index=[day]))
 
-    actual_susceptible_population_vector = time_series_df['Active Cases'].values[df_index:]
+    actual_susceptible_population_vector = time_series_df['Susceptible Population'].values[df_index:]
 
-    forecasted_susceptible_population_vector = SIRD_forecast_time_series['I'].to_numpy()
+    forecasted_susceptible_population_vector = SIRD_forecast_time_series['S'].to_numpy()
 
     actual_infected_vector = time_series_df['Active Cases'].values[df_index:]
 
@@ -106,16 +108,24 @@ def sird_model(X, periods=15):
 
     actual_deaths_vector = time_series_df['Total Deaths'].values[df_index: df_index + len(SIRD_forecast_time_series)]
 
-    forecasted_desths_vector = SIRD_forecast_time_series['D'].to_numpy()
+    forecasted_deaths_vector = SIRD_forecast_time_series['D'].to_numpy()
 
-    plt.plot(actual_susceptible_population_vector, label='Mortes - Atuais')
-    plt.plot(forecasted_susceptible_population_vector, label='Mortes - Previsão')
-    plt.plot(actual_infected_vector, label='Casos Ativos - Atuais')
-    plt.plot(forecasted_infecter_vector, label='Casos Ativos - Previsão')
-    plt.plot(actual_recovered_vector, label='Recuperados - Atuais')
-    plt.plot(forecasted_recovered_vector, label='Recuperados - Previsão')
-    plt.plot(actual_deaths_vector, label='Mortes - Atuais')
-    plt.plot(forecasted_desths_vector, label='Mortes - Previsão')
+    actual_total_cases_vector = time_series_df['Total Cases'].values[df_index: df_index + len(SIRD_forecast_time_series)]
+
+    print(actual_total_cases_vector)
+
+    forecasted_total_cases_vector = total_cases_forecast
+
+    # plt.plot(actual_susceptible_population_vector, label='Susceptible Population - Actual')
+    # plt.plot(forecasted_susceptible_population_vector, label='Susceptible Population - Forecast')
+    plt.plot(actual_infected_vector, label='Active Cases - Actual')
+    plt.plot(forecasted_infecter_vector, label='Active Cases - Forecast')
+    plt.plot(actual_recovered_vector, label='Recovered - Actual')
+    plt.plot(forecasted_recovered_vector, label='Recovered - Forecast')
+    plt.plot(actual_deaths_vector, label='Deaths - Actual')
+    plt.plot(forecasted_deaths_vector, label='Deaths - Forecast')
+    # plt.plot(actual_total_cases_vector, label='Total Cases - Actual')
+    # plt.plot(forecasted_total_cases_vector, label='Total Cases - Forecast')
 
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
                ncol=2, mode="expand", borderaxespad=0.)
@@ -129,10 +139,10 @@ def sird_model_fitting(X):
     demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
 
     country_population = (demographics_df['Population'].values[
-        demographics_df.index[demographics_df['Country'] == 'Brazil']])
+        demographics_df.index[demographics_df['Country'] == 'Us']])
 
     # load and set time series data
-    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/brazil.csv')
+    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/us.csv')
 
     total_cases_time_series = time_series_df['Total Cases'].to_numpy()
 
@@ -145,7 +155,9 @@ def sird_model_fitting(X):
 
     time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
 
-    susceptible_population_time_series = np.repeat(country_population, len(time_series_df))
+    country_population_vector = np.repeat(country_population, len(time_series_df))
+
+    susceptible_population_time_series = country_population_vector - time_series_df['Total Cases'].to_numpy()
 
     time_series_df.insert(len(time_series_df.columns), 'Susceptible Population', susceptible_population_time_series)
 
@@ -164,9 +176,9 @@ def sird_model_fitting(X):
 
     susceptible_population = time_series_df['Susceptible Population'].values[df_index]
 
-    current_infected_population = time_series_df['Active Cases'].values[df_index]
+    current_infected_population = time_series_df['Active Cases'].values[df_index] * 20
 
-    recovered_population = time_series_df['Total Recover Cases'].values[df_index]
+    recovered_population = time_series_df['Total Recover Cases'].values[df_index] * 40
 
     dead_population = time_series_df['Total Deaths'].values[df_index]
 
@@ -176,7 +188,7 @@ def sird_model_fitting(X):
     R = recovered_population  # recovered population
     D = dead_population  # dead population
 
-    total_cases = [time_series_df['Total Cases'].values[df_index]]
+    total_cases_forecast = [time_series_df['Total Cases'].values[df_index]]
 
     SIRD_forecast_time_series = pd.DataFrame({'S': S, 'I': I, 'R': R, 'D': D}, index=[0])
 
@@ -186,9 +198,9 @@ def sird_model_fitting(X):
 
     for day in range(1, forecast_days):
         # disease params
-        alpha = X[0 + 3 * day]
-        beta = X[1 + 3 * day]
-        gamma = X[2 + 3 * day]
+        alpha = X[0]
+        beta = X[1]
+        gamma = X[2]
 
         last_period_S = SIRD_forecast_time_series['S'].values[len(SIRD_forecast_time_series) - 1]
         last_period_I = SIRD_forecast_time_series['I'].values[len(SIRD_forecast_time_series) - 1]
@@ -200,8 +212,7 @@ def sird_model_fitting(X):
         recovered_population_forecast = int(last_period_R + (beta * last_period_I))
         dead_population_forecast = int(last_period_D + (gamma * last_period_I))
 
-        total_cases.append(total_cases[-1] + ((alpha / country_population) * last_period_S * last_period_I))
-
+        total_cases_forecast.append(country_population - susceptible_population)
 
 
         SIRD_forecast_time_series = SIRD_forecast_time_series.append(pd.DataFrame({"S": susceptible_population_forecast,
@@ -210,9 +221,10 @@ def sird_model_fitting(X):
                                                                                    "D": dead_population_forecast},
                                                                                   index=[day]))
 
-    actual_susceptible_population_vector = time_series_df['Total Deaths'].values[df_index: df_index + len(SIRD_forecast_time_series)]
 
-    forecasted_susceptible_population_vector = SIRD_forecast_time_series['D'].to_numpy()
+    actual_susceptible_population_vector = time_series_df['Susceptible Population'].values[df_index: df_index + len(SIRD_forecast_time_series)]
+
+    forecasted_susceptible_population_vector = SIRD_forecast_time_series['S'].to_numpy()
 
     squared_susceptible_population_errors = np.square(forecasted_susceptible_population_vector - actual_susceptible_population_vector)
 
@@ -255,94 +267,25 @@ def sird_model_fitting(X):
 
 if __name__ == '__main__':
 
-    root_dir = os.path.join(os.path.dirname(__file__), '..')
-
-    # load and set demographic data
-    demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
-
-    country_population = (demographics_df['Population'].values[
-        demographics_df.index[demographics_df['Country'] == 'Brazil']])
-
-    # load and set time series data
-    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/brazil.csv')
-
-    total_cases_time_series = time_series_df['Total Cases'].to_numpy()
-
-    active_cases_time_series = time_series_df['Active Cases'].to_numpy()
-
-    total_deaths_time_series = time_series_df['Total Deaths'].to_numpy()
-
-    total_recover_cases_time_series = pd.DataFrame(
-            total_cases_time_series - active_cases_time_series - total_deaths_time_series)
-
-    time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
-
-    # data retrieval from dataframes
-
-    infected_var = 0
-    recovered_var = 0
-    dead_var = 0
-
-    df_index = 0
-    while infected_var == 0 or recovered_var == 0 or dead_var == 0:
-        infected_var = time_series_df['Active Cases'].values[df_index]
-        recovered_var = time_series_df['Total Recover Cases'].values[df_index]
-        dead_var = time_series_df['Total Deaths'].values[df_index]
-        df_index += 1
-
-    forecast_days = len(time_series_df) - df_index - 1
-
-    bounds = []
-
     alpha_range = (0, 1)
     beta_range = (0, 1)
     gama_range = (0, 0.1)
 
-    for i in range(forecast_days):
-        bounds.append(alpha_range)
-        bounds.append(beta_range)
-        bounds.append(gama_range)
+    bounds = [alpha_range, beta_range, gama_range]
 
     optimized_SIRD_model_result = differential_evolution(sird_model_fitting, bounds=bounds, workers=16)
 
     parameters_list = optimized_SIRD_model_result.x
 
-    R_naught_list = []
+    R_naught = parameters_list[0] / (parameters_list[1] + parameters_list[2])
 
-    for day in range(forecast_days):
-
-        alpha = parameters_list[0 + 3 * day]
-        beta = parameters_list[1 + 3 * day]
-        gamma = parameters_list[2 + 3 * day]
-
-        R_naught = alpha / (beta + gamma)
-
-        R_naught_list.append(R_naught)
+    print(R_naught)
 
     print(parameters_list)
 
-    print(len(parameters_list))
+    # parameters_list =
 
-    print(R_naught_list)
-
-    periods_for_forecasting = 20
-
-    last_alpha = parameters_list[-3]
-    last_beta = parameters_list[-2]
-    last_gamma = parameters_list[-1]
-
-    print(forecast_days)
-
-    print(periods_for_forecasting - forecast_days)
-
-    for i in range(periods_for_forecasting - forecast_days):
-        parameters_list = np.append(parameters_list, parameters_list[-3:])
-
-    print(parameters_list)
-
-    print(len(parameters_list))
+    periods_for_forecasting = 40
 
     sird_model(parameters_list, periods=periods_for_forecasting)
-
-
 
