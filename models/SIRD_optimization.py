@@ -168,7 +168,7 @@ def sird_model_fitting(X):
     dead_var = 0
 
     df_index = 0
-    while infected_var == 0 or recovered_var == 0 or dead_var == 0:
+    while infected_var < 200 or recovered_var < 200 or dead_var < 200:
         infected_var = time_series_df['Active Cases'].values[df_index]
         recovered_var = time_series_df['Total Recover Cases'].values[df_index]
         dead_var = time_series_df['Total Deaths'].values[df_index]
@@ -288,4 +288,5 @@ if __name__ == '__main__':
     periods_for_forecasting = 40
 
     sird_model(parameters_list, periods=periods_for_forecasting)
+
 
