@@ -15,5 +15,5 @@ r = requests.get(brazil_file_url).text
 
 brazil_states_dataframe = pd.read_csv(StringIO(r), delimiter=';')
 
-brazil_states_dataframe.to_csv(root_dir + '/data/brazillian_states_data/COVID19_' + today + '.csv', index=False)
+brazil_states_dataframe.to_csv(root_dir + '/data/brazillian_states_time_series/COVID19_' + today + '.csv', index=False)
 

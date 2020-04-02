@@ -1,54 +1,160 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+import os
+import pandas as pd
+from scipy.optimize import differential_evolution
 
 
-
-# Total population, N.
-N = 1000
-# Initial number of infected and recovered individuals, I0 and R0.
-I0, R0 = 1, 0
-# Everyone else, S0, is susceptible to infection initially.
-S0 = N - I0 - R0
-# Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-alpha, beta, gamma = 0.5, 0.2, 1./10
-# A grid of time points (in days)
-t = np.linspace(0, 160, 160)
-
-D0 = 20
-
-# The SIR model differential equations.
-def deriv(y, t, N, beta, gamma):
+def SIRD_model(y, t, N, X):
+    # SIRD model differential equations.
     S, I, R, D = y
-    dSdt = -alpha * S * I / N
-    dIdt = alpha * S * I / N - (gamma + beta) * I
-    dDdt = beta * I
-    dRdt = gamma * I
+    dSdt = -X[0] * S * I / N
+    dIdt = X[0] * S * I / N - (X[1] + X[2]) * I
+    dDdt = X[1] * I
+    dRdt = X[2] * I
     return dSdt, dIdt, dRdt, dDdt
 
-# Initial conditions vector
-y0 = S0, I0, R0, D0
-# Integrate the SIR equations over the time grid, t.
-ret = odeint(deriv, y0, t, args=(N, beta, gamma))
-S, I, R = ret.T
 
-# Plot the data on three separate curves for S(t), I(t) and R(t)
-fig = plt.figure(facecolor='w')
-ax = fig.add_subplot(111, axisbelow=True)
-ax.plot(t, S/1000, 'b', alpha=0.5, lw=2, label='Susceptible')
-ax.plot(t, I/1000, 'r', alpha=0.5, lw=2, label='Infected')
-ax.plot(t, R/1000, 'g', alpha=0.5, lw=2, label='Recovered with immunity')
-ax.set_xlabel('Time /days')
-ax.set_ylabel('Number (1000s)')
-ax.set_ylim(0,1.2)
-ax.yaxis.set_tick_params(length=0)
-ax.xaxis.set_tick_params(length=0)
-ax.grid(b=True, which='major', c='w', lw=2, ls='-')
-legend = ax.legend()
-legend.get_frame().set_alpha(0.5)
-for spine in ('top', 'right', 'bottom', 'left'):
-    ax.spines[spine].set_visible(False)
-plt.show()
+def SIRD_model_sim(y0, t, N, X):
+    # Integrate the SIR equations over the time grid, t.
+    ret = odeint(SIRD_model, y0, t, args=(N, X))
+    S, I, R, D = ret.T
+    return S, I, R, D
 
 
+def SIRD_model_fitting(X, *args):
+    y0 = args[0]
+    N = args[1]
+    t = args[2]
+
+    # Integrate the SIR equations over the time grid, t.
+    ret = odeint(SIRD_model, y0, t, args=(N, X))
+
+    S, I, R, D = ret.T
+
+    # Crop time series to retrieve data with at least one infected.
+    actual_S_vector = time_series_df['Susceptible Population'].values[df_index: df_index + len(S)]
+    forecasted_S_vector = S
+    squared_S_errors = np.square(forecasted_S_vector - actual_S_vector)
+    sum_of_S_squared_errors = np.sum(squared_S_errors)
+
+    actual_I_vector = time_series_df['Active Cases'].values[df_index: df_index + len(I)]
+    forecasted_I_vector = I
+    squared_I_errors = np.square(forecasted_I_vector - actual_I_vector)
+    sum_of_I_squared_errors = np.sum(squared_I_errors)
+
+    actual_R_vector = time_series_df['Total Recover Cases'].values[df_index: df_index + len(R)]
+    forecasted_R_vector = R
+    R_squared_errors = np.square(forecasted_R_vector - actual_R_vector)
+    sum_of_R_squared_errors = np.sum(R_squared_errors)
+
+    actual_D_vector = time_series_df['Total Deaths'].values[df_index: df_index + len(D)]
+    forecasted_D_vector = D
+    squared_D_errors = np.square(forecasted_D_vector - actual_D_vector)
+    sum_of_D_squared_errors = np.sum(squared_D_errors)
+
+    return sum_of_S_squared_errors + sum_of_I_squared_errors + sum_of_R_squared_errors + sum_of_D_squared_errors
+
+
+def obtain_best_fit_estimators(y0, N, t, bounds):
+    optimized_SIRD_model_result = differential_evolution(SIRD_model_fitting, bounds=bounds, args=(y0, N, t,))
+    return optimized_SIRD_model_result.x
+
+
+def plot_SIRD_model(S, I, R, D):
+    actual_S_vector = time_series_df['Susceptible Population'].values[df_index: df_index + len(S)]
+    actual_I_vector = time_series_df['Active Cases'].values[df_index: df_index + len(I)]
+    actual_R_vector = time_series_df['Total Recover Cases'].values[df_index: df_index + len(R)]
+    actual_D_vector = time_series_df['Total Deaths'].values[df_index: df_index + len(D)]
+
+    # Plot the data on three separate curves for S(t), I(t) and R(t)
+    fig = plt.figure(facecolor='w')
+    ax = fig.add_subplot(111, axisbelow=True)
+    # ax.plot(t, S/1000, 'b', alpha=0.5, lw=2, label='Susceptible')
+    ax.plot(t, I, 'r', alpha=0.5, lw=2, label='Infected - Forecast')
+    ax.plot(t, R, 'g', alpha=0.5, lw=2, label='Recovered with immunity - Forecast')
+    ax.plot(t, D, 'y', alpha=0.5, lw=2, label='Dead - Forecast')
+    ax.plot(t, actual_I_vector, 'k', alpha=0.5, lw=2, label='Infected - Actual')
+    ax.plot(t, actual_R_vector, 'c', alpha=0.5, lw=2, label='Recovered with immunity - Actual')
+    ax.plot(t, actual_D_vector, 'm', alpha=0.5, lw=2, label='Dead - Actual')
+    ax.set_xlabel('Time /days')
+    ax.set_ylabel('Number (1000s)')
+    # ax.set_ylim(0,1.2)
+    ax.yaxis.set_tick_params(length=0)
+    ax.xaxis.set_tick_params(length=0)
+    ax.grid(b=True, which='major', c='w', lw=2, ls='-')
+    legend = ax.legend()
+    legend.get_frame().set_alpha(0.5)
+    for spine in ('top', 'right', 'bottom', 'left'):
+        ax.spines[spine].set_visible(False)
+    plt.show()
+
+########################################################################################################################
+########################################################################################################################
+
+
+if __name__ == '__main__':
+
+    root_dir = os.path.join(os.path.dirname(__file__), '..')
+
+    # Load and set demographic data.
+    demographics_df = pd.read_csv(root_dir + '/data/countries_demographics/countries_demographics.csv')
+    country_population = (demographics_df['Population'].values[
+        demographics_df.index[demographics_df['Country'] == 'Brazil']])
+
+    # Load and set time series data.
+    time_series_df = pd.read_csv(root_dir + '/data/countries_time_series/brazil.csv')
+    total_cases_time_series = time_series_df['Total Cases'].to_numpy()
+    active_cases_time_series = time_series_df['Active Cases'].to_numpy()
+    total_deaths_time_series = time_series_df['Total Deaths'].to_numpy()
+    total_recover_cases_time_series = pd.DataFrame(
+        total_cases_time_series - active_cases_time_series - total_deaths_time_series)
+    time_series_df.insert(len(time_series_df.columns), 'Total Recover Cases', total_recover_cases_time_series)
+    country_population_vector = np.repeat(country_population, len(time_series_df))
+    susceptible_population_time_series = country_population_vector - time_series_df['Total Cases'].to_numpy()
+    time_series_df.insert(len(time_series_df.columns), 'Susceptible Population', susceptible_population_time_series)
+
+    # Data retrieval from dataframes.
+    infected_var = 0
+    recovered_var = 0
+    dead_var = 0
+
+    df_index = 0
+    while infected_var == 0 and recovered_var == 0 and dead_var == 0:
+        infected_var = time_series_df['Active Cases'].values[df_index]
+        recovered_var = time_series_df['Total Recover Cases'].values[df_index]
+        dead_var = time_series_df['Total Deaths'].values[df_index]
+        df_index += 1
+
+    susceptible_population = time_series_df['Susceptible Population'].values[df_index]
+    current_infected_population = time_series_df['Active Cases'].values[df_index]
+    recovered_population = time_series_df['Total Recover Cases'].values[df_index]
+    dead_population = time_series_df['Total Deaths'].values[df_index]
+
+    # Initial model values.
+    S = susceptible_population  # susceptible population
+    I = current_infected_population  # infected population
+    R = recovered_population  # recovered population
+    D = dead_population  # dead population
+
+    y0 = S, I, R, D
+
+    N = country_population.item(0)
+
+    # Determine time grid for fitting
+    t_length = len(time_series_df) - df_index - 1
+    t = t = np.linspace(0, t_length, t_length)
+
+    alpha_bounds = (0, 1)
+    beta_bounds = (0, 1)
+    gamma_bounds = (0, 0.1)
+
+    bounds = [alpha_bounds, beta_bounds, gamma_bounds]
+
+    best_fit_estimators = obtain_best_fit_estimators(y0, N, t, bounds)
+
+    S, I, R, D = SIRD_model_sim(y0, t, N, best_fit_estimators)
+
+    plot_SIRD_model(S, I, R, D)
 
