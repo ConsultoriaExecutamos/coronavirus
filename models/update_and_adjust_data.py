@@ -108,3 +108,30 @@ adjusted_total_cases_time_series = np.ndarray.astype(adjusted_total_cases_time_s
 # Insert adjusted total cases on adjusted dataframe.
 adjusted_time_series_df.insert(len(adjusted_time_series_df.columns), 'Total Cases', adjusted_total_cases_time_series)
 
+# We are considering that 80% of cases are mild, with recuperation in 2 14 days, while the remaining 18.6% are grave and
+# take 21 days to recover.
+
+mild_cases_proportion = 0.8
+grave_cases_proportion = 1 - mild_cases_proportion - edr
+mild_cases_recovery_time = 14
+grave_cases_recovery_time = 21
+
+adjusted_total_recovered_cases_time_series = np.zeros(len(adjusted_time_series_df))
+
+for i in range(21, len(adjusted_time_series_df)):
+    adjusted_total_recovered_cases_time_series[i] = \
+        adjusted_total_cases_time_series[i - mild_cases_recovery_time] * mild_cases_proportion + \
+        adjusted_total_cases_time_series[i - grave_cases_recovery_time] * grave_cases_proportion
+
+adjusted_total_recovered_cases_time_series = np.ndarray.astype(adjusted_total_recovered_cases_time_series, int)
+
+# Insert adjusted total recovery cases on adjusted dataframe.
+adjusted_time_series_df.insert(len(adjusted_time_series_df.columns), 'Total Recovery Cases', adjusted_total_recovered_cases_time_series)
+
+adjusted_active_cases_time_series = adjusted_total_cases_time_series - adjusted_total_recovered_cases_time_series - original_total_deaths_time_series
+
+# Insert adjusted total recovery cases on adjusted dataframe.
+adjusted_time_series_df.insert(len(adjusted_time_series_df.columns), 'Active Cases', adjusted_active_cases_time_series)
+
+adjusted_time_series_df.to_csv(root_dir + '/data/countries_time_series/brazil_updated.csv', index=False)
+
