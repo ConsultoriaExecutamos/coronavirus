@@ -129,8 +129,6 @@ if __name__ == '__main__':
     R = recovered_population  # recovered population
     D = dead_population  # dead population
 
-    # y0 = S, I, R, D
-
     y0 = S, I, R, D
 
     N = country_population.item(0)
@@ -139,9 +137,9 @@ if __name__ == '__main__':
     t_length = len(time_series_df) - df_index - 1
     t = t = np.linspace(0, t_length, t_length)
 
-    alpha_bounds = (0, 100)
-    beta_bounds = (0, 100)
-    gamma_bounds = (0, 100)
+    alpha_bounds = (0, 1)
+    beta_bounds = (0, 1)
+    gamma_bounds = (0, 0.1)
 
     bounds = [alpha_bounds, beta_bounds, gamma_bounds]
 

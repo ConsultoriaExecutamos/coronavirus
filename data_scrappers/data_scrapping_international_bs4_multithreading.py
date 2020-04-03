@@ -88,3 +88,4 @@ for country in all_linked_countries_list:
     data_request = threading.Thread(target=retrieve_country_data_and_save, args=(country,))
     data_request.start()
 
+
