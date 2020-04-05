@@ -45,7 +45,7 @@ def SIRD_model_fitting(X, *args):
 
     for i in range(len(forecasts_list)):
         # Crop time series to retrieve data with at least one infected.
-        actual_vector = time_series_df[time_series_columns_list[i]].values[9:]
+        actual_vector = time_series_df[time_series_columns_list[i]].values[11:]
         forecasted_vector = forecasts_list[i]
         actual_vector+=1
         squared_errors = np.abs((forecasted_vector/actual_vector)-1)
@@ -101,6 +101,7 @@ def plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t):
     for spine in ('top', 'right', 'bottom', 'left'):
         ax.spines[spine].set_visible(False)
     plt.show()
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -172,4 +173,4 @@ if __name__ == '__main__':
     S, IN, IA, IS, R, D, SUM = SIRD_model_sim(y0, t, N, best_fit_estimators)
     plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t)
 
-
+    
