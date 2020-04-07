@@ -5,6 +5,7 @@ import os
 import pandas as pd
 from scipy.optimize import differential_evolution
 
+
 def SIRD_model(y, t, N, X):
     # SIRD model differential equations.
     S, IN, IA, IS, R, D, SUM = y
@@ -53,7 +54,7 @@ def SIRD_model_fitting(X, *args):
 
 def obtain_best_fit_estimators(y0, N, t, bounds):
     optimized_SIRD_model_result = differential_evolution(SIRD_model_fitting, bounds=bounds, args=(y0, N, t,),
-                                                         maxiter=50, disp=True, polish=True, mutation=(0,1.9),workers=1)
+                                                         maxiter=500, disp=True, polish=True, mutation=(0,1.9),workers=1,)
     return optimized_SIRD_model_result.x
 
 
@@ -126,7 +127,7 @@ if __name__ == '__main__':
 
     pd.set_option('display.max_columns', None)
 
-    S0= country_population*0.64*0.5*0.4
+    S0= country_population*0.64*0.53*0.4
     y0 = S0, current_infected_population, recovered_population, 0, 0, 0, 0
 
     N = country_population.item(0)
@@ -142,9 +143,9 @@ if __name__ == '__main__':
     beta_bounds = (0.1, 0.25)
     # The median time of death since incubation date is 20 days, according to Wang et.al (2020) - Estimating clinical
     # severity of COVID-19 from the transmission dynamics in Wuhan, China. Also, we considered that the lower bound for
-    # fatality rate is 0.014 and the upper bound is 0.045. We allowed it to bounce between 5 (0.0009/0.045) days and 15
-    # (0.009/0.015) days, considering the sum on incubation and isolation time.
-    gamma_bounds = (0.0009, 0.009)
+    # fatality rate is 0.014 and the upper bound is 0.025. We allowed it to bounce between 5 (0.0009/0.014) days and 15
+    # (0.005/0.025) days, considering the sum on incubation and isolation time.
+    gamma_bounds = (0.0009, 0.005)
     # The median time of incubation is 5 days, according to Wang et.al (2020) - Estimating clinical severity of
     # COVID-19 from the transmission dynamics in Wuhan, China. We allowed it to bounce between 3.3 (1/0.3)
     # days and 7.14 (1/0.14) days.
