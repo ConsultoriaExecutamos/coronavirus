@@ -131,21 +131,33 @@ if __name__ == '__main__':
 
     N = country_population.item(0)
 
-    # Determine time grid for fitting
+    # Determine time grid for fitting.
     t_length = len(time_series_df) - df_index
     t = t = np.linspace(0, t_length, t_length)
 
+    # Allow it to be as free as possible.
     alpha_bounds = (0, 100)
-    beta_bounds = (0.071, 0.14)
-    gamma_bounds = (0.002, 0.001)
+    # The recovery parameter. We allowed it to bounce between 4 (1/0.25) days and 10 (1/0.1) days, considering the sum
+    # on incubation and isolation time.
+    beta_bounds = (0.1, 0.25)
+    # The median time of death since incubation date is 20 days, according to Wang et.al (2020) - Estimating clinical
+    # severity of COVID-19 from the transmission dynamics in Wuhan, China. Also, we considered that the lower bound for
+    # fatality rate is 0.014 and the upper bound is 0.045. We allowed it to bounce between 5 (0.0009/0.045) days and 15
+    # (0.009/0.015) days, considering the sum on incubation and isolation time.
+    gamma_bounds = (0.0009, 0.009)
+    # The median time of incubation is 5 days, according to Wang et.al (2020) - Estimating clinical severity of
+    # COVID-19 from the transmission dynamics in Wuhan, China. We allowed it to bounce between 3.3 (1/0.3)
+    # days and 7.14 (1/0.14) days.
     tetta_bound = (0.14, 0.3)
-    delta_bound = (0.14, 0.2)
+    # Isolation parameter. We allowed it to bounce between 5 (1/0.2) days and 14 (1/0.0588) days.
+    delta_bound = (0.0588, 0.2)
 
     bounds = [alpha_bounds, beta_bounds, gamma_bounds, tetta_bound, delta_bound]
 
     best_fit_estimators = obtain_best_fit_estimators(y0, N, t, bounds)
 
-    t = t = np.linspace(0, 120, 120) # projections
+    # Determine time grid for projections.
+    t = t = np.linspace(0, 120, 120)
     print(best_fit_estimators)
     S, IN, IA, IS, R, D, SUM = SIRD_model_sim(y0, t, N, best_fit_estimators)
     plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t)

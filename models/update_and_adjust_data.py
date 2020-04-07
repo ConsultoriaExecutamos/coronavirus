@@ -30,7 +30,7 @@ adjusted_time_series_df.insert(len(adjusted_time_series_df.columns), 'Total Deat
 adjusted_time_series_df.insert(len(adjusted_time_series_df.columns), 'Daily New Deaths',
                                original_time_series_df['Daily New Deaths'].to_numpy())
 
-# According to Wu et.al (2020) - Estimating clinical severity of COVID-19 from the transmission dynamics in Wuhan, China
+# According to Wang et.al (2020) - Estimating clinical severity of COVID-19 from the transmission dynamics in Wuhan, China
 # the real mortality rate is 1.4% and the mean time between disease onset and death is 20 days.
 estimated_death_rate = edr = 0.014
 mean_time_between_disease_onset_and_death = mtod = 20
