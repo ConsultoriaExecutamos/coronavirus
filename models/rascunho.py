@@ -1,17 +1,10 @@
-n = 34
+import datetime
 
-step_size = 3
 
-number_of_steps = n // 3 + 1
-last_step_size = n % 3
+starting_date = datetime.datetime(year=2020, month=2, day=27)
 
-print(number_of_steps, last_step_size)
+yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
 
-schedule = []
+corrective_date_index = yesterday - starting_date
 
-for i in range(number_of_steps - 1):
-    schedule.append(step_size)
-
-schedule.append(last_step_size)
-
-print(schedule)
+print(corrective_date_index.days)

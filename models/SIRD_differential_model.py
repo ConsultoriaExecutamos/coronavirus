@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from scipy.optimize import differential_evolution
+import datetime
 
 
 def SIRD_model(y, t, N, X):
@@ -63,8 +64,8 @@ def plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t):
     # Plot the data on three separate curves for S(t), I(t) and R(t)
     fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111, axisbelow=True)
-    ax.plot(t, IN, 'k', alpha=0.5, lw=2, label='Infected Incubating - Forecast')
-    ax.plot(t, IA, 'c', alpha=0.5, lw=2, label='Infected Active - Forecast')
+    ax.plot(t, IN, 'k', alpha=0.5, lw=2, label='Banana')
+    ax.plot(t, IA, 'c', alpha=0.5, lw=2, label='De')
     ax.plot(t, IS, 'm', alpha=0.5, lw=2, label='Infected Isolated - Forecast')
     ax.plot(t, IN + IA + IS, 'r', alpha=0.5, lw=2, label='Infected Total - Forecast')
     ax.plot(t, SUM, 'b', alpha=0.5, lw=2, label='Total Cases - Forecast')
@@ -158,8 +159,50 @@ if __name__ == '__main__':
     best_fit_estimators = obtain_best_fit_estimators(y0, N, t, bounds)
 
     # Determine time grid for projections.
-    t = t = np.linspace(0, 120, 120)
+    t = t = np.linspace(0, 90, 90)
     print(best_fit_estimators)
+
     S, IN, IA, IS, R, D, SUM = SIRD_model_sim(y0, t, N, best_fit_estimators)
     plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t)
+
+    beggining_of_ajusted_time_series = datetime.datetime(year=2020, month=2, day=27)
+
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+
+    corrective_date_index = (yesterday - beggining_of_ajusted_time_series).days
+
+    list_S = S.tolist()[corrective_date_index:]
+    list_IN = IN.tolist()[corrective_date_index:]
+    list_IA = IA.tolist()[corrective_date_index:]
+    list_IS = IS.tolist()[corrective_date_index:]
+    list_R = R.tolist()[corrective_date_index:]
+    list_D = D.tolist()[corrective_date_index:]
+    list_SUM = SUM.tolist()[corrective_date_index:]
+
+    S_data = []
+    IN_data = []
+    IA_data = []
+    IS_data = []
+    R_data = []
+    D_data = []
+    SUM_data = []
+
+    all_lists_list = [list_S, list_IN, list_IA, list_IS, list_R, list_D, list_SUM]
+
+    all_data_list = [S_data, IN_data, IA_data, IS_data, R_data, D_data, SUM_data]
+
+    time_delta = datetime.timedelta(days=1)
+
+    for i in range(len(all_data_list)):
+        for j in range(len(list_S)):
+            all_data_list[i].append([int(datetime.datetime.timestamp(yesterday + time_delta * j)) * 1000, int(all_lists_list[i][j])])
+
+    print(all_data_list[0])
+    print(all_data_list[1])
+    print(all_data_list[2])
+    print(all_data_list[3])
+    print(all_data_list[4])
+    print(all_data_list[5])
+    print(all_data_list[6])
+
 
