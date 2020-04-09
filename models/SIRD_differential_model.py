@@ -40,17 +40,17 @@ def SIRD_model_fitting(X, *args):
     time_series_columns_list = ['Total Deaths', 'Total Recovery Cases']
     forecasts_list = [D, R]
 
-    sum_of_squared_errors = 0
+    sum_of_errors = 0
 
     for i in range(len(forecasts_list)):
         # Crop time series to retrieve data with at least one infected.
         actual_vector = time_series_df[time_series_columns_list[i]].values[df_index:]
         forecasted_vector = forecasts_list[i]
-        actual_vector+=1
-        squared_errors = np.abs((forecasted_vector/actual_vector)-1)
-        sum_of_squared_errors += np.sum(squared_errors)
+        actual_vector+=1    # In order to keep the operation viable when actual vector has zeros.
+        errors = np.abs((forecasted_vector/actual_vector)-1)
+        sum_of_errors += np.sum(errors)
 
-    return sum_of_squared_errors
+    return sum_of_errors
 
 
 def obtain_best_fit_estimators(y0, N, t, bounds):
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     t_length = len(time_series_df) - df_index
     t = t = np.linspace(0, t_length, t_length)
 
-    # Allow it to be as free as possible.
+    # Allow it to be as free as possible, as long as it is acceptable.
     alpha_bounds = (0, 0.6)
     # The recovery parameter. We allowed it to bounce between 4 (1/0.25) days and 10 (1/0.1) days, considering the sum
     # on incubation and isolation time.
@@ -150,11 +150,11 @@ if __name__ == '__main__':
     # The median time of incubation is 5 days, according to Wang et.al (2020) - Estimating clinical severity of
     # COVID-19 from the transmission dynamics in Wuhan, China. We allowed it to bounce between 3.3 (1/0.3)
     # days and 7.14 (1/0.14) days.
-    tetta_bound = (0.14, 0.3)
+    tetha_bound = (0.14, 0.3)
     # Isolation parameter. We allowed it to bounce between 5 (1/0.2) days and 14 (1/0.0588) days.
     delta_bound = (0.0588, 0.2)
 
-    bounds = [alpha_bounds, beta_bounds, gamma_bounds, tetta_bound, delta_bound]
+    bounds = [alpha_bounds, beta_bounds, gamma_bounds, tetha_bound, delta_bound]
 
     best_fit_estimators = obtain_best_fit_estimators(y0, N, t, bounds)
 

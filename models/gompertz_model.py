@@ -7,23 +7,6 @@ from scipy.stats import norm, t, gompertz
 from scipy.optimize import differential_evolution
 
 
-# Define funcion with the coefficients to estimate
-def func_logistic(t, a, b, c):
-    return c / (1 + a * np.exp(-b*t))
-
-
-def func_sin(t, a, b, c, d):
-    return a*np.sin(b*(t - c)) + d
-
-
-def cdf(t, a, b):
-    return norm.cdf(t, a, b)
-
-
-def cdf_student(t, a, b, c):
-    return t.cdf(t, a, b, c)
-
-
 def gompertz_model(X, x):
     #a = upper asymptote
     #b = negative = x axis displacement
@@ -71,7 +54,6 @@ time_steps = range(len(total_deaths_time_series))
 
 time_steps = np.array(time_steps)
 
-# Convert pd.Series to np.Array and use Scipy's curve fit to find   # the best Nonlinear Least Squares coefficients
 x = time_steps
 y = total_deaths_time_series
 
