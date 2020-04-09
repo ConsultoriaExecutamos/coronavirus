@@ -10,7 +10,7 @@ import datetime
 def SIRD_model(y, t, N, X):
     # SIRD model differential equations.
     S, IN, IA, IS, R, D, SUM = y
-    dSdt = (-X[0]*S*(IA/(S+IA+IS+IN+R)))
+    dSdt = (-X[0]*S*(IA/N))
     dINdt = (X[0]*S*(IA/N)) - (X[3] * IN)
     dIAdt = X[3] * IN - (X[4] * IA)
     dISdt = X[4] * IA - (X[1] + X[2]) * IS
@@ -37,8 +37,8 @@ def SIRD_model_fitting(X, *args):
 
     S, IN, IA, IS, R, D, SUM = ret.T
 
-    time_series_columns_list = ['Active Cases','Total Recovery Cases', 'Total Deaths']
-    forecasts_list = [[IN + IA + IS],R, D]
+    time_series_columns_list = ['Total Deaths', 'Total Recovery Cases']
+    forecasts_list = [D, R]
 
     sum_of_squared_errors = 0
 
@@ -55,7 +55,8 @@ def SIRD_model_fitting(X, *args):
 
 def obtain_best_fit_estimators(y0, N, t, bounds):
     optimized_SIRD_model_result = differential_evolution(SIRD_model_fitting, bounds=bounds, args=(y0, N, t,),
-                                                         maxiter=500, disp=True, polish=True, mutation=(0,1.9),workers=1,)
+                                                         maxiter=50, disp=True, polish=True, mutation=(0,1.9),workers=1,
+                                                         seed=1)
     return optimized_SIRD_model_result.x
 
 
@@ -64,8 +65,8 @@ def plot_SIRD_model(S, IN, IA, IS, R, D, SUM,t):
     # Plot the data on three separate curves for S(t), I(t) and R(t)
     fig = plt.figure(facecolor='w')
     ax = fig.add_subplot(111, axisbelow=True)
-    ax.plot(t, IN, 'k', alpha=0.5, lw=2, label='Banana')
-    ax.plot(t, IA, 'c', alpha=0.5, lw=2, label='De')
+    ax.plot(t, IN, 'k', alpha=0.5, lw=2, label='Infected Incubation - Forecast')
+    ax.plot(t, IA, 'c', alpha=0.5, lw=2, label='Infected Active - Forecast')
     ax.plot(t, IS, 'm', alpha=0.5, lw=2, label='Infected Isolated - Forecast')
     ax.plot(t, IN + IA + IS, 'r', alpha=0.5, lw=2, label='Infected Total - Forecast')
     ax.plot(t, SUM, 'b', alpha=0.5, lw=2, label='Total Cases - Forecast')
@@ -128,17 +129,16 @@ if __name__ == '__main__':
 
     pd.set_option('display.max_columns', None)
 
-    S0= country_population*0.64*0.53*0.4
-    y0 = S0, current_infected_population, recovered_population, 0, 0, 0, 0
+    S0 = N = 34000/0.019    # Gompertz Model output - 34k and the average of the mortality rate bounds (1,4% and 2,5%).
 
-    N = country_population.item(0)
+    y0 = S0, current_infected_population, recovered_population, 0, 0, 0, 0
 
     # Determine time grid for fitting.
     t_length = len(time_series_df) - df_index
     t = t = np.linspace(0, t_length, t_length)
 
     # Allow it to be as free as possible.
-    alpha_bounds = (0, 100)
+    alpha_bounds = (0, 0.6)
     # The recovery parameter. We allowed it to bounce between 4 (1/0.25) days and 10 (1/0.1) days, considering the sum
     # on incubation and isolation time.
     beta_bounds = (0.1, 0.25)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     best_fit_estimators = obtain_best_fit_estimators(y0, N, t, bounds)
 
     # Determine time grid for projections.
-    t = t = np.linspace(0, 90, 90)
+    t = t = np.linspace(0, 120, 120)
     print(best_fit_estimators)
 
     S, IN, IA, IS, R, D, SUM = SIRD_model_sim(y0, t, N, best_fit_estimators)
@@ -178,6 +178,7 @@ if __name__ == '__main__':
     list_R = R.tolist()[corrective_date_index:]
     list_D = D.tolist()[corrective_date_index:]
     list_SUM = SUM.tolist()[corrective_date_index:]
+    list_TI = IN[corrective_date_index:] + IA[corrective_date_index:] + IS[corrective_date_index:]
 
     S_data = []
     IN_data = []
@@ -186,10 +187,11 @@ if __name__ == '__main__':
     R_data = []
     D_data = []
     SUM_data = []
+    TI_data = []
 
-    all_lists_list = [list_S, list_IN, list_IA, list_IS, list_R, list_D, list_SUM]
+    all_lists_list = [list_S, list_IN, list_IA, list_IS, list_R, list_D, list_SUM, list_TI]
 
-    all_data_list = [S_data, IN_data, IA_data, IS_data, R_data, D_data, SUM_data]
+    all_data_list = [S_data, IN_data, IA_data, IS_data, R_data, D_data, SUM_data, TI_data]
 
     time_delta = datetime.timedelta(days=1)
 
@@ -204,5 +206,5 @@ if __name__ == '__main__':
     print(all_data_list[4])
     print(all_data_list[5])
     print(all_data_list[6])
-
+    print(all_data_list[7])
 
