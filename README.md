@@ -13,9 +13,26 @@
     </a>
 </p>
 
-<p align="center">
-  Trying to forecast coronavirus spread under different quarantine scenarios using data analytics
+<p>
+  Trying to forecast coronavirus spread under different scenarios using data analytics and basic epidemiological models.
 </p>
+
+<p>
+  To download data, use the data scrapper data_scrapping_single_country_bs4.py and select the country.
+</p>
+
+<p>
+  For Brazil, use update_and_adjust_data.py for updating the data with the methodology there described.
+</p>
+
+<p>
+  Adjust population size with gompertz_model.py.
+ </p>
+ 
+ <p>
+  Run SIRD_differential_model.py to obtain the series with the forecasts for Brazil (or other country, as long as the above steps were attended.
+ </p> 
+
 
 
 
